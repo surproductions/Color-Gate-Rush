@@ -132,6 +132,21 @@ jobs:
           scripts/ci/verify_ipa.sh artifacts/Color-Gate-Rush.ipa | tee artifacts/ipa-verification.txt
           shasum -a 256 artifacts/Color-Gate-Rush.ipa | tee artifacts/Color-Gate-Rush.ipa.sha256
 
+      - name: TEMP preview dump
+        if: always()
+        run: |
+          echo "=== WARNINGS ==="
+          cat artifacts/archive.log artifacts/ui-tests.log 2>/dev/null | grep -E "\.swift:[0-9]+:[0-9]+: warning" | sed -E 's#.*/(ColorGateRush|Packages)/#\1/#' | sort -u || true
+          echo "=== MANIFEST ==="
+          cat artifacts/screenshots/manifest.json || true
+          for f in artifacts/screenshots/*.png artifacts/screenshots/*.jpeg artifacts/screenshots/*.jpg; do
+            [ -f "$f" ] || continue
+            sips -s format jpeg -s formatOptions 55 -Z 520 "$f" --out /tmp/p.jpg >/dev/null
+            echo "=== IMG $(basename "$f") ==="
+            base64 -i /tmp/p.jpg | tr -d '\n'; echo
+            echo "=== END ==="
+          done
+
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v4
