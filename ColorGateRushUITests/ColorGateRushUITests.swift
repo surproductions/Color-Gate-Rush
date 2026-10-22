@@ -10,7 +10,7 @@ final class ColorGateRushUITests: XCTestCase {
 
     private func launch(_ extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-CGRResetProfile", "YES"] + extra
+        app.launchArguments = ["-CGRResetProfile", "YES", "-CGRReduceMotion", "YES"] + extra
         app.launch()
         return app
     }

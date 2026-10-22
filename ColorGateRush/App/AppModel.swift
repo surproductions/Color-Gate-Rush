@@ -185,6 +185,8 @@ struct DebugOptions {
     let demoTheme: String?
     /// Autopilot hands control back after this many seconds of play (0 = never).
     let autopilotSeconds: Double
+    /// Forces Reduce Motion so UI tests aren't slowed by continuous menu animations.
+    let reduceMotion: Bool
 
     init(defaults: UserDefaults) {
         #if DEBUG
@@ -200,6 +202,7 @@ struct DebugOptions {
         demoBest = max(0, defaults.integer(forKey: "CGRDemoBest"))
         demoTheme = defaults.string(forKey: "CGRDemoTheme")
         autopilotSeconds = max(0, defaults.double(forKey: "CGRAutopilotSeconds"))
+        reduceMotion = defaults.bool(forKey: "CGRReduceMotion")
         #else
         resetProfile = false
         skipTutorial = false
@@ -212,11 +215,13 @@ struct DebugOptions {
         demoBest = 0
         demoTheme = nil
         autopilotSeconds = 0
+        reduceMotion = false
         #endif
     }
 
     func applyOverrides(to profile: inout PlayerProfile) {
         if skipTutorial { profile.tutorialCompleted = true }
+        if reduceMotion { profile.settings.reducedMotion = true }
         if grantShards > 0 { profile.shards = max(profile.shards, grantShards) }
         if demoProfile {
             profile.tutorialCompleted = true
