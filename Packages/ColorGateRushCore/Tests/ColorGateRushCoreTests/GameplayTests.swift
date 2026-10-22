@@ -11,9 +11,20 @@ private struct ScriptedSource: RowSource {
 
 final class GameplayTests: XCTestCase {
 
+    /// Simulates `seconds` of real time in small frames (single updates are clamped to 0.1 s).
+    private func tick(_ session: GameSession, _ seconds: Double) {
+        let frame = 1.0 / 120.0
+        var remaining = seconds
+        while remaining > 1e-9 {
+            let dt = min(frame, remaining)
+            session.update(dt: dt)
+            remaining -= dt
+        }
+    }
+
     private func runningSession(seed: UInt64 = 42) -> GameSession {
         let session = GameSession(mode: .endless, seed: seed)
-        session.update(dt: GameSession.startCountdown + 0.01)
+        tick(session, GameSession.startCountdown + 0.01)
         XCTAssertEqual(session.phase, .running)
         _ = session.drainEvents()
         return session
@@ -38,10 +49,9 @@ final class GameplayTests: XCTestCase {
         let session = GameSession(mode: .endless, seed: 1)
         XCTAssertEqual(session.phase, .countdown)
         let start = session.distance
-        session.update(dt: 1.0)
+        tick(session, 1.0)
         XCTAssertEqual(session.distance, start, "orb must not move during countdown")
-        session.update(dt: 1.0)
-        session.update(dt: 1.01)
+        tick(session, 2.01)
         XCTAssertEqual(session.phase, .running)
         let events = session.drainEvents()
         XCTAssertTrue(events.contains(.go))
@@ -103,16 +113,16 @@ final class GameplayTests: XCTestCase {
             TrackRow(id: 9002, position: base + 3, kind: .hazard, lanes: [.hazard, .hazard, .hazard])
         ]
         session.replaceRowsForTesting(script)
-        session.update(dt: GameSession.startCountdown + 0.01)
+        tick(session, GameSession.startCountdown + 0.01)
         _ = session.drainEvents()
-        session.update(dt: 1.2 / session.speed)
+        tick(session, 1.2 / session.speed)
         XCTAssertTrue(session.hasShield)
-        session.update(dt: 1.0 / session.speed)
+        tick(session, 1.0 / session.speed)
         XCTAssertFalse(session.hasShield)
         XCTAssertEqual(session.shieldsUsed, 1)
         XCTAssertEqual(session.phase, .running)
         XCTAssertEqual(session.combo, 0)
-        session.update(dt: 1.0 / session.speed)
+        tick(session, 1.0 / session.speed)
         XCTAssertEqual(session.phase, .ended)
     }
 
@@ -121,7 +131,7 @@ final class GameplayTests: XCTestCase {
         session.replaceRowsForTesting([
             TrackRow(id: 9000, position: 1, kind: .gate, lanes: [.gate(.crimson), .gate(.crimson), .gate(.crimson)])
         ])
-        session.update(dt: GameSession.startCountdown + 0.01)
+        tick(session, GameSession.startCountdown + 0.01)
         for _ in 0..<50 { session.update(dt: 0.05) }
         XCTAssertEqual(session.gatesPassed, 1)
         XCTAssertEqual(session.score, ScoreRules.gatePoints(combo: 1))
@@ -142,7 +152,7 @@ final class GameplayTests: XCTestCase {
         XCTAssertFalse(session.move(1) && session.move(-1), "input ignored while paused")
         session.resume()
         XCTAssertEqual(session.phase, .countdown)
-        session.update(dt: GameSession.resumeCountdown + 0.01)
+        tick(session, GameSession.resumeCountdown + 0.01)
         XCTAssertEqual(session.phase, .running)
         session.update(dt: 0.1)
         XCTAssertGreaterThan(session.distance, distance)
@@ -151,8 +161,8 @@ final class GameplayTests: XCTestCase {
     func testNoUpdatesAfterEnd() {
         let session = GameSession(mode: .endless, seed: 5)
         session.replaceRowsForTesting([TrackRow(id: 1, position: 1, kind: .hazard, lanes: [.hazard, .hazard, .hazard])])
-        session.update(dt: GameSession.startCountdown + 0.01)
-        session.update(dt: 0.5)
+        tick(session, GameSession.startCountdown + 0.01)
+        tick(session, 0.5)
         XCTAssertEqual(session.phase, .ended)
         let score = session.score
         let distance = session.distance
@@ -182,17 +192,17 @@ final class GameplayTests: XCTestCase {
             TrackRow(id: 1, position: 1, kind: .prism, lanes: Array(repeating: .prism(.azure), count: 3)),
             TrackRow(id: 2, position: 3, kind: .gate, lanes: [.gate(.crimson), .gate(.azure), .gate(.crimson)])
         ])
-        session.update(dt: GameSession.startCountdown + 0.01)
-        session.update(dt: 2 / session.speed)
+        tick(session, GameSession.startCountdown + 0.01)
+        tick(session, 2 / session.speed)
         XCTAssertEqual(session.color, .azure)
-        session.update(dt: 2 / session.speed)
+        tick(session, 2 / session.speed)
         XCTAssertEqual(session.phase, .running)
         XCTAssertEqual(session.gatesPassed, 1)
     }
 
     func testTutorialForgivesMistakesAndCompletes() {
         let session = GameSession(mode: .tutorial, seed: 0)
-        session.update(dt: GameSession.startCountdown + 0.01)
+        tick(session, GameSession.startCountdown + 0.01)
         // Never steer: the orb will hit barriers and wrong gates, which must not end the tutorial early.
         var steps = 0
         while session.phase != .ended && steps < 20_000 {
