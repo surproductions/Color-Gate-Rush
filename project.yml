@@ -23,7 +23,6 @@ targets:
         excludes:
           - Info.plist
       - path: Packages/ColorGateRushCore/Sources/ColorGateRushCore
-        group: Core
     settings:
       base:
         PRODUCT_NAME: ColorGateRush

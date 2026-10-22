@@ -40,11 +40,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
+      - name: Show toolchain
         run: |
-          XCODE="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)"
-          if [ -n "$XCODE" ]; then sudo xcode-select -s "$XCODE"; fi
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
           mkdir -p artifacts
 
       - name: Install XcodeGen
