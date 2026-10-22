@@ -55,14 +55,19 @@ jobs:
                   shutil.copy(f"raw/{a['exportedFileName']}", f"store/{name}.png")
           PY
           sips -g pixelWidth -g pixelHeight store/*.png | paste - - - | head -50
-      - name: Publish to appstore-screenshots branch
-        run: |
-          cd store
-          git init -q -b appstore-screenshots
-          git add -A
-          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "App Store screenshots (run ${GITHUB_RUN_NUMBER})"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" appstore-screenshots
       - uses: actions/upload-artifact@v4
         with:
           name: appstore-screenshots
           path: store
+      - name: Publish to appstore-screenshots branch
+        run: |
+          cd store
+          git init -q -b appstore-screenshots
+          git config http.postBuffer 524288000
+          git add -A
+          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "App Store screenshots (run ${GITHUB_RUN_NUMBER})"
+          for delay in 0 10 30 60; do
+            sleep "$delay"
+            if git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" appstore-screenshots; then exit 0; fi
+          done
+          exit 1
