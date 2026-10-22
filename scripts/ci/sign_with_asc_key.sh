@@ -13,7 +13,7 @@
 #   IOS_BUNDLE_ID      bundle identifier (default com.surproductions.colorgaterush)
 #   TESTFLIGHT_UPLOAD  "true" to upload to App Store Connect instead of only exporting
 #   BUILD_NUMBER       CFBundleVersion
-# The API key needs the Admin role for Xcode to create distribution certificates.
+# The API key needs the Admin role: export uses Apple's cloud-managed distribution certificate.
 set -euo pipefail
 : "${APPLE_TEAM_ID:?missing}" "${ASC_KEY_ID:?missing}" "${ASC_ISSUER_ID:?missing}" "${ASC_KEY_P8:?missing}"
 METHOD="${IOS_EXPORT_METHOD:-app-store-connect}"
@@ -40,12 +40,15 @@ AUTH=(-allowProvisioningUpdates
       -authenticationKeyID "$ASC_KEY_ID"
       -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 
+# Archive WITHOUT signing. CI machines are throwaway, so a locally created development
+# certificate would be orphaned after every run (Xcode then demands it be revoked). Instead the
+# export step below signs for distribution with Apple's cloud-managed certificate via the API key.
 xcodebuild archive \
   -project ColorGateRush.xcodeproj -scheme ColorGateRush -configuration Release \
   -destination 'generic/platform=iOS' -archivePath build/Signed.xcarchive \
   DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic \
   PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
-  "${AUTH[@]}"
+  CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
 
 DESTINATION=export
 [ "${TESTFLIGHT_UPLOAD:-false}" = "true" ] && [ "$METHOD" = "app-store-connect" ] && DESTINATION=upload
