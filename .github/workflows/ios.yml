@@ -53,8 +53,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show toolchain
+      - name: Select newest Xcode
         run: |
+          # App Store Connect requires apps built with the current iOS SDK (iOS 26 / Xcode 26 as of 2026),
+          # so use the newest stable Xcode installed on the runner rather than the image default.
+          XCODE="$(ls -d /Applications/Xcode_*.app 2>/dev/null | grep -vi beta | sort -V | tail -1)"
+          if [ -n "$XCODE" ]; then sudo xcode-select -s "$XCODE"; fi
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
           mkdir -p artifacts
