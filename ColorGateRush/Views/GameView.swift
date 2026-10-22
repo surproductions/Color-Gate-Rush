@@ -102,14 +102,20 @@ private struct HUDView: View {
                             .font(.system(size: 44, weight: .black, design: .rounded))
                             .monospacedDigit()
                             .contentTransition(.numericText())
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                            .fixedSize(horizontal: true, vertical: false)
                             .shadow(color: .black.opacity(0.5), radius: 4)
                         if state.combo > 1 {
                             Text("x\(state.multiplier)  •  \(state.combo) combo")
                                 .font(.system(.subheadline, design: .rounded).weight(.heavy))
                                 .foregroundStyle(state.color.color)
+                                .lineLimit(1)
+                                .fixedSize(horizontal: true, vertical: false)
                                 .shadow(color: .black.opacity(0.6), radius: 3)
                         }
                     }
+                    .layoutPriority(1)
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("Score \(state.score), combo \(state.combo)")
 
