@@ -37,6 +37,7 @@ jobs:
     env:
       BUILD_NUMBER: ${{ github.run_number }}
       HAS_SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' && secrets.IOS_PROVISIONING_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' }}
+      HAS_ASC_KEY: ${{ secrets.APPLE_TEAM_ID != '' && secrets.ASC_KEY_ID != '' && secrets.ASC_ISSUER_ID != '' && secrets.ASC_KEY_P8 != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -110,7 +111,11 @@ jobs:
 
       - name: Package IPA
         run: |
-          if [ "$HAS_SIGNING" = "true" ]; then
+          if [ "$HAS_ASC_KEY" = "true" ]; then
+            echo "App Store Connect API key found: automatic signing (${IOS_EXPORT_METHOD:-app-store-connect})."
+            scripts/ci/sign_with_asc_key.sh artifacts/Color-Gate-Rush.ipa
+            echo "signed" > artifacts/signing-status.txt
+          elif [ "$HAS_SIGNING" = "true" ]; then
             echo "Signing secrets found: exporting a signed IPA (${IOS_EXPORT_METHOD:-ad-hoc})."
             scripts/ci/sign_and_export.sh artifacts/Color-Gate-Rush.ipa
             echo "signed" > artifacts/signing-status.txt
@@ -124,8 +129,13 @@ jobs:
           IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
           IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
           IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           IOS_EXPORT_METHOD: ${{ vars.IOS_EXPORT_METHOD }}
           IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+          TESTFLIGHT_UPLOAD: ${{ vars.TESTFLIGHT_UPLOAD }}
 
       - name: Verify IPA
         run: |
