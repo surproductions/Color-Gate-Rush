@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum UIPalette {
-    static let panel = Color.white.opacity(0.07)
+    static let panel = Color(red: 0.08, green: 0.07, blue: 0.19).opacity(0.88)
     static let panelStroke = Color.white.opacity(0.14)
     static let secondaryText = Color.white.opacity(0.7)
     static let shard = Color(red: 0.62, green: 0.96, blue: 1.0)
@@ -117,15 +117,19 @@ struct ScreenHeader: View {
     }
 }
 
-/// Animated backdrop for menus: a perspective track with gates sliding toward the viewer.
+/// Backdrop for menus. The home screen shows a perspective track with gates sliding toward
+/// the viewer; sub-screens use a calm gradient so text and panels stay readable.
 struct MenuBackground: View {
     let theme: VisualTheme
     var animated = true
+    var showsTrack = true
 
     var body: some View {
         ZStack {
             LinearGradient(colors: [theme.skyTopColor, theme.skyBottomColor], startPoint: .top, endPoint: .bottom)
-            if animated {
+            if !showsTrack {
+                HorizonGlow(theme: theme)
+            } else if animated {
                 TimelineView(.animation) { timeline in
                     TrackCanvas(theme: theme, time: timeline.date.timeIntervalSinceReferenceDate)
                 }
@@ -139,6 +143,26 @@ struct MenuBackground: View {
     }
 }
 
+/// Soft elliptical glow; a radial gradient drawn in a scaled context so it has no hard edges.
+private func drawGlow(_ context: GraphicsContext, theme: VisualTheme, center: CGPoint, radius: CGFloat) {
+    var glow = context
+    glow.translateBy(x: center.x, y: center.y)
+    glow.scaleBy(x: 1.5, y: 0.45)
+    glow.fill(Path(ellipseIn: CGRect(x: -radius, y: -radius, width: radius * 2, height: radius * 2)),
+              with: .radialGradient(Gradient(colors: [theme.glowColor.opacity(0.55), theme.glowColor.opacity(0)]),
+                                    center: .zero, startRadius: 0, endRadius: radius))
+}
+
+private struct HorizonGlow: View {
+    let theme: VisualTheme
+
+    var body: some View {
+        Canvas { context, size in
+            drawGlow(context, theme: theme, center: CGPoint(x: size.width / 2, y: size.height * 0.3), radius: size.width * 0.8)
+        }
+    }
+}
+
 private struct TrackCanvas: View {
     let theme: VisualTheme
     let time: Double
@@ -149,11 +173,7 @@ private struct TrackCanvas: View {
             let bottomY = size.height * 1.05
             let halfBottom = size.width * 0.75
 
-            // Horizon glow.
-            let glowRect = CGRect(x: horizon.x - size.width, y: horizon.y - 90, width: size.width * 2, height: 180)
-            context.fill(Path(ellipseIn: glowRect),
-                         with: .radialGradient(Gradient(colors: [theme.glowColor.opacity(0.55), .clear]),
-                                               center: horizon, startRadius: 0, endRadius: size.width * 0.8))
+            drawGlow(context, theme: theme, center: horizon, radius: size.width * 0.8)
 
             func point(_ lane: CGFloat, _ depth: CGFloat) -> CGPoint {
                 // depth 0 = horizon, 1 = bottom of screen.
@@ -196,11 +216,11 @@ private struct TrackCanvas: View {
 
 extension View {
     /// Standard full-screen menu container.
-    func menuScreen(theme: VisualTheme, animated: Bool = true) -> some View {
+    func menuScreen(theme: VisualTheme, animated: Bool = true, showsTrack: Bool = false) -> some View {
         self
             .padding(.horizontal, 20)
             .frame(maxWidth: 560)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(MenuBackground(theme: theme, animated: animated))
+            .background(MenuBackground(theme: theme, animated: animated, showsTrack: showsTrack))
     }
 }

@@ -78,7 +78,7 @@ enum AchievementCatalog {
     /// Conditions are evaluated after the run's totals have been added to the profile.
     static let all: [Achievement] = [
         Achievement(id: "ach.tutorial", title: "First Steps", detail: "Complete the tutorial.", reward: 20,
-                    icon: "graduationcap.fill") { run, profile in run.completedTutorial || profile.tutorialCompleted },
+                    icon: "graduationcap.fill") { run, _ in run.completedTutorial },
         Achievement(id: "ach.gates25", title: "Gatecrasher", detail: "Pass 25 gates in one run.", reward: 30,
                     icon: "door.left.hand.open") { run, _ in !run.isTutorial && run.gatesPassed >= 25 },
         Achievement(id: "ach.score1000", title: "Four Digits", detail: "Score 1,000 points in one run.", reward: 40,

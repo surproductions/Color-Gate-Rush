@@ -86,7 +86,7 @@ struct HomeView: View {
                 .padding(.top, 16)
                 .padding(.bottom, 12)
         }
-        .menuScreen(theme: model.theme, animated: !reduceMotion)
+        .menuScreen(theme: model.theme, animated: !reduceMotion, showsTrack: true)
         .onAppear {
             withAnimation(.spring(response: 0.6, dampingFraction: 0.7)) { appeared = true }
             guard !reduceMotion else { return }
