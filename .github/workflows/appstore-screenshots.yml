@@ -4,13 +4,18 @@ name: App Store Screenshots
 # the `appstore-screenshots` branch and as a workflow artifact.
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: macOS runner label
+        type: string
+        default: macos-latest
 
 permissions:
   contents: write
 
 jobs:
   screenshots:
-    runs-on: macos-15
+    runs-on: ${{ inputs.runner || 'macos-latest' }}
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
