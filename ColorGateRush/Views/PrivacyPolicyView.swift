@@ -44,7 +44,7 @@ enum PrivacyPolicy {
 
     static let sections: [(title: String, body: String)] = [
         ("No data collected",
-         "Color Gate Rush does not collect, transmit or share any personal information. There are no accounts, analytics, ads, crash reporters or trackers, and the app makes no network requests."),
+         "Color Door Rush does not collect, transmit or share any personal information. There are no accounts, analytics, ads, crash reporters or trackers, and the app makes no network requests."),
         ("Stored on your device",
          "Your best scores, run history, achievements, unlocked cosmetics, shards, settings and tutorial progress are saved only on this device. You can erase them any time with Settings → Reset Progress, or by deleting the app."),
         ("No tracking",

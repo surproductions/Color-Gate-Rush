@@ -1,4 +1,6 @@
-# Color Gate Rush
+# Color Door Rush
+
+*(Repository, Xcode project and bundle ID keep the original working name "Color Gate Rush" / `com.surproductions.colorgaterush`; the player-facing name is Color Door Rush.)*
 
 An original neon arcade game for iPhone. Your orb rushes down a three-lane track. Fly through
 gates that match its color, dodge striped barriers, and grab prisms that recolor you mid-run.

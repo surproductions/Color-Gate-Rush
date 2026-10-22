@@ -1,8 +1,8 @@
-# Color Gate Rush — Privacy Policy
+# Color Door Rush — Privacy Policy
 
 **Effective date:** October 22, 2026
 
-Color Gate Rush ("the app") is published by surproductions ("we", "us"). This policy explains what
+Color Door Rush ("the app") is published by surproductions ("we", "us"). This policy explains what
 information the app handles. The short version: **the app does not collect, transmit or share any
 personal information.**
 

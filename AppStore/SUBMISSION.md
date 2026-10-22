@@ -1,4 +1,4 @@
-# App Store submission kit: Color Gate Rush 1.0
+# App Store submission kit: Color Door Rush 1.0
 
 Paste these values into App Store Connect. Character limits were checked against Apple's limits.
 
@@ -8,9 +8,9 @@ App Store Connect → **Apps → + → New App**
 | Field | Value |
 |---|---|
 | Platforms | iOS |
-| Name | `Color Gate Rush` |
+| Name | `Color Door Rush` |
 | Primary language | English (U.S.) |
-| Bundle ID | `com.surproductions.colorgaterush` (it appears in the list after the first signed CI build registers it) |
+| Bundle ID | `com.surproductions.colorgaterush` (unchanged by the rename) (it appears in the list after the first signed CI build registers it) |
 | SKU | `colorgaterush-ios-001` (any unique string) |
 | User access | Full access |
 
@@ -53,7 +53,7 @@ Switch lanes, match your orb's color, and dodge barriers as the speed climbs. Sh
 
 **Keywords (≤100, comma-separated, no spaces)**
 ```
-arcade,color,match,runner,reflex,lanes,neon,endless,casual,offline,tap,speed,gates,orb,dodge
+arcade,color,match,runner,reflex,lanes,neon,endless,casual,offline,tap,speed,gates,doors,orb,dodge
 ```
 
 | Field | Value |
@@ -76,7 +76,7 @@ Select the build that the **iOS Build** workflow uploaded (section 8).
 - Contact: your name, phone and email. These are only visible to Apple.
 - **Notes**, ready to paste:
 ```
-Color Gate Rush is a single-player offline arcade game. No account, login, network connection, in-app purchase or ads.
+Color Door Rush is a single-player offline arcade game. No account, login, network connection, in-app purchase or ads.
 
 How to play: the first launch starts a short interactive tutorial. Tap the left/right side of the screen or swipe left/right to switch lanes (Settings and the pause menu offer Tap + Swipe, Tap Sides, or Swipe Only). Pass through gates matching the orb's color and shape; striped barriers end the run; full-width prisms change the orb's color. Shards earned in play unlock cosmetic items in "Style" (no real money).
 

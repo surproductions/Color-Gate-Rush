@@ -114,7 +114,7 @@ struct TitleLogo: View {
                 }
             }
             .padding(.bottom, 10)
-            Text("COLOR GATE")
+            Text("COLOR DOOR")
                 .font(.system(size: 46, weight: .black, design: .rounded))
                 .italic()
                 .foregroundStyle(.white)
@@ -128,7 +128,7 @@ struct TitleLogo: View {
         .minimumScaleFactor(0.6)
         .lineLimit(1)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Color Gate Rush")
+        .accessibilityLabel("Color Door Rush")
         .accessibilityAddTraits(.isHeader)
         .onAppear { if animate { shimmer = true } }
     }

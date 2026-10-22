@@ -1,6 +1,6 @@
 name: iOS Build
 
-# Builds Color Gate Rush on a macOS runner:
+# Builds Color Door Rush on a macOS runner:
 #   1. core unit tests, 2. UI tests + screenshots on a simulator,
 #   3. a Release archive for real devices (generic/platform=iOS) packaged as an IPA,
 #   4. optional signing when signing secrets are configured,
@@ -186,7 +186,7 @@ jobs:
           SHA="$(awk '{print $1}' artifacts/Color-Gate-Rush.ipa.sha256)"
           SIZE="$(stat -f%z artifacts/Color-Gate-Rush.ipa)"
           {
-            echo "## Color Gate Rush ${TAG}"
+            echo "## Color Door Rush ${TAG}"
             echo
             echo "Built by GitHub Actions run [#${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) from commit ${GITHUB_SHA}."
             echo
@@ -208,7 +208,7 @@ jobs:
             cat artifacts/ipa-verification.txt
             echo '```'
           } > artifacts/release-notes.md
-          TITLE="Color Gate Rush ${TAG}"
+          TITLE="Color Door Rush ${TAG}"
           if [ "$STATUS" = "unsigned" ]; then TITLE="${TITLE} (unsigned IPA)"; fi
           ASSETS=(artifacts/Color-Gate-Rush.ipa artifacts/Color-Gate-Rush.ipa.sha256 artifacts/ipa-verification.txt)
           for shot in artifacts/screenshots/*.png; do [ -f "$shot" ] && ASSETS+=("$shot"); done
@@ -233,6 +233,6 @@ jobs:
           git init -q -b ipa-builds
           git config http.postBuffer 524288000
           git add -A
-          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "Color Gate Rush ${TAG} (${STATUS})"
+          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "Color Door Rush ${TAG} (${STATUS})"
           git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ipa-builds
           echo "Download: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/ipa-builds/Color-Gate-Rush.ipa"

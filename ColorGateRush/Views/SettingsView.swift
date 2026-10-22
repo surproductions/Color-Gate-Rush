@@ -82,7 +82,7 @@ struct SettingsView: View {
                         }
                     }
 
-                    Text("Color Gate Rush \(Self.versionString)\nAll progress is stored on this device. No accounts, ads or tracking.")
+                    Text("Color Door Rush \(Self.versionString)\nAll progress is stored on this device. No accounts, ads or tracking.")
                         .font(.system(.caption2, design: .rounded))
                         .foregroundStyle(UIPalette.secondaryText)
                         .multilineTextAlignment(.center)

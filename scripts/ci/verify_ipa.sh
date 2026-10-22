@@ -14,7 +14,7 @@ EXEC="$(plutil -extract CFBundleExecutable raw "$PLIST")"
 PLATFORM="$(plutil -extract DTPlatformName raw "$PLIST")"
 ARCHS="$(lipo -archs "$APP/$EXEC")"
 
-echo "== Color Gate Rush IPA verification =="
+echo "== Color Door Rush IPA verification =="
 echo "File:            $(basename "$IPA")"
 echo "Size (bytes):    $(stat -f%z "$IPA")"
 echo "SHA-256:         $(shasum -a 256 "$IPA" | awk '{print $1}')"
