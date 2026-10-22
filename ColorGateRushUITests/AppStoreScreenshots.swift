@@ -92,22 +92,27 @@ final class AppStoreScreenshots: XCTestCase {
     }
 
     func test08UnlockDialog() {
+        // The demo profile owns Pulse/Hex/Nova and has 640 shards, so Comet (180) opens the unlock dialog.
         let app = launch(calm)
         app.buttons["cosmeticsButton"].tap()
-        let hex = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Hex Core'")).firstMatch
-        XCTAssertTrue(hex.waitForExistence(timeout: 20))
-        hex.tap()
+        let comet = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Comet'")).firstMatch
+        XCTAssertTrue(comet.waitForExistence(timeout: 20))
+        comet.tap()
         XCTAssertTrue(app.buttons["confirmUnlockButton"].waitForExistence(timeout: 20))
         sleep(1)
         shot("review-unlock-dialog")
-        app.buttons["dialogCancelButton"].tap()
-        let comet = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Void Gem'")).firstMatch
-        if !comet.isHittable { app.swipeUp() }
-        comet.tap()
-        if app.buttons["playToEarnButton"].waitForExistence(timeout: 20) {
-            sleep(1)
-            shot("review-shortfall-dialog")
-        }
+    }
+
+    func test08bShortfallDialog() {
+        // A fresh profile has 0 shards, so any locked item shows the "not enough shards" dialog.
+        let app = launch(demo: false, calm + ["-CGRSkipTutorial", "YES"])
+        app.buttons["cosmeticsButton"].tap()
+        let pulse = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Pulse'")).firstMatch
+        XCTAssertTrue(pulse.waitForExistence(timeout: 20))
+        pulse.tap()
+        XCTAssertTrue(app.buttons["playToEarnButton"].waitForExistence(timeout: 20))
+        sleep(1)
+        shot("review-shortfall-dialog")
     }
 
     func test09PauseMenu() {
