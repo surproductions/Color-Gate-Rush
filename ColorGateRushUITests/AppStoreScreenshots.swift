@@ -90,4 +90,39 @@ final class AppStoreScreenshots: XCTestCase {
         sleep(1)
         shot("store-progress")
     }
+
+    func test08UnlockDialog() {
+        let app = launch(calm)
+        app.buttons["cosmeticsButton"].tap()
+        let hex = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Hex Core'")).firstMatch
+        XCTAssertTrue(hex.waitForExistence(timeout: 20))
+        hex.tap()
+        XCTAssertTrue(app.buttons["confirmUnlockButton"].waitForExistence(timeout: 20))
+        sleep(1)
+        shot("review-unlock-dialog")
+        app.buttons["dialogCancelButton"].tap()
+        let comet = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Void Gem'")).firstMatch
+        if !comet.isHittable { app.swipeUp() }
+        comet.tap()
+        if app.buttons["playToEarnButton"].waitForExistence(timeout: 20) {
+            sleep(1)
+            shot("review-shortfall-dialog")
+        }
+    }
+
+    func test09PauseMenu() {
+        let app = launch(["-CGRStartScreen", "game", "-CGRAutopilot", "YES", "-CGRSeed", "5"])
+        let pause = app.buttons["pauseButton"]
+        XCTAssertTrue(pause.waitForExistence(timeout: 20))
+        sleep(6)
+        pause.tap()
+        XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 20))
+        sleep(1)
+        shot("review-pause-menu")
+        app.buttons["quitButton"].tap()
+        if app.buttons["confirmQuitButton"].waitForExistence(timeout: 20) {
+            sleep(1)
+            shot("review-quit-dialog")
+        }
+    }
 }
