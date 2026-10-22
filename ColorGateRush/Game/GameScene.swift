@@ -21,6 +21,7 @@ final class GameScene: SKScene {
     private let textures: TextureFactory
     #if DEBUG
     var autopilot: Autopilot?
+    var autopilotSeconds: Double = 0
     private let debugLabel = SKLabelNode(fontNamed: "Menlo-Bold")
     var showsDebugOverlay = false
     #endif
@@ -364,6 +365,9 @@ final class GameScene: SKScene {
         }
 
         #if DEBUG
+        if autopilotSeconds > 0 && session.elapsed > autopilotSeconds {
+            autopilot = nil
+        }
         if var bot = autopilot {
             bot.step(session, dt: dt)
             autopilot = bot

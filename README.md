@@ -181,7 +181,24 @@ Without signing secrets the workflow produces an **unsigned** device IPA, and bo
 the release notes say so. iOS will only install it after you re-sign it, for example with
 AltStore or Sideloadly using your own Apple ID, or with your developer certificate.
 
-To have CI produce a **signed** IPA, add these repository secrets (Settings → Secrets and
+**Option A: App Store Connect API key (recommended).** Add these repository secrets. Xcode then
+signs automatically, creating or reusing the certificate and profile for your team. The key needs
+the **Admin** role.
+
+| Secret | Value |
+|---|---|
+| `APPLE_TEAM_ID` | Your Apple Developer Team ID |
+| `ASC_KEY_ID` | The API key ID |
+| `ASC_ISSUER_ID` | The issuer ID shown on the App Store Connect *Integrations → Keys* page |
+| `ASC_KEY_P8` | The contents of `AuthKey_<id>.p8`; with or without the BEGIN/END lines |
+
+The default export is `app-store-connect`, which is installable through TestFlight and the App Store. Set the
+repository variable `IOS_EXPORT_METHOD` to `release-testing` (Ad Hoc) or `debugging` (Development)
+instead; those two only install on devices registered to your team. Set `TESTFLIGHT_UPLOAD=true`
+to also upload each build to App Store Connect. That needs an app record with the same bundle ID,
+which you create in App Store Connect first.
+
+**Option B: certificate and profile.** To have CI produce a **signed** IPA this way, add these repository secrets (Settings → Secrets and
 variables → Actions). Never commit them.
 
 | Secret | Value |

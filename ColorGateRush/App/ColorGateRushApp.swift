@@ -36,6 +36,8 @@ struct RootView: View {
                 ProgressScreen().transition(.move(edge: .trailing).combined(with: .opacity))
             case .settings:
                 SettingsView().transition(.move(edge: .trailing).combined(with: .opacity))
+            case .privacy:
+                PrivacyPolicyView().transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .statusBarHidden(true)

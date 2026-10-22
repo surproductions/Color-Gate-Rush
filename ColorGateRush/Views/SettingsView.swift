@@ -71,6 +71,9 @@ struct SettingsView: View {
                             Button { model.startTutorial() } label: { Label("Replay Tutorial", systemImage: "graduationcap.fill") }
                                 .buttonStyle(GlassButtonStyle())
                                 .accessibilityIdentifier("replayTutorialButton")
+                            Button { model.navigate(.privacy) } label: { Label("Privacy Policy", systemImage: "hand.raised.fill") }
+                                .buttonStyle(GlassButtonStyle())
+                                .accessibilityIdentifier("privacyButton")
                             Button(role: .destructive) { confirmReset = true } label: {
                                 Label("Reset Progress", systemImage: "trash.fill")
                                     .foregroundStyle(GateColor.crimson.color)

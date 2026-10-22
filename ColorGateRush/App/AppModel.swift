@@ -5,7 +5,7 @@ import SwiftUI
 @MainActor
 final class AppModel: ObservableObject {
     enum Screen: Equatable {
-        case home, game, results, cosmetics, progress, settings
+        case home, game, results, cosmetics, progress, settings, privacy
     }
 
     @Published private(set) var profile: PlayerProfile
@@ -179,6 +179,12 @@ struct DebugOptions {
     let autopilot: Bool
     let overlay: Bool
     let seed: UInt64?
+    /// Fills the profile with realistic progress (used for App Store screenshots).
+    let demoProfile: Bool
+    let demoBest: Int
+    let demoTheme: String?
+    /// Autopilot hands control back after this many seconds of play (0 = never).
+    let autopilotSeconds: Double
 
     init(defaults: UserDefaults) {
         #if DEBUG
@@ -190,6 +196,10 @@ struct DebugOptions {
         overlay = defaults.bool(forKey: "CGRDebugOverlay")
         let seedValue = defaults.integer(forKey: "CGRSeed")
         seed = seedValue > 0 ? UInt64(seedValue) : nil
+        demoProfile = defaults.bool(forKey: "CGRDemoProfile")
+        demoBest = max(0, defaults.integer(forKey: "CGRDemoBest"))
+        demoTheme = defaults.string(forKey: "CGRDemoTheme")
+        autopilotSeconds = max(0, defaults.double(forKey: "CGRAutopilotSeconds"))
         #else
         resetProfile = false
         skipTutorial = false
@@ -198,11 +208,37 @@ struct DebugOptions {
         autopilot = false
         overlay = false
         seed = nil
+        demoProfile = false
+        demoBest = 0
+        demoTheme = nil
+        autopilotSeconds = 0
         #endif
     }
 
     func applyOverrides(to profile: inout PlayerProfile) {
         if skipTutorial { profile.tutorialCompleted = true }
         if grantShards > 0 { profile.shards = max(profile.shards, grantShards) }
+        if demoProfile {
+            profile.tutorialCompleted = true
+            profile.bestScore = demoBest > 0 ? demoBest : 4820
+            profile.bestDistance = 2140
+            profile.bestCombo = 64
+            profile.highestTier = .hyper
+            profile.totalRuns = 42
+            profile.totalGates = 1875
+            profile.totalShardsCollected = 960
+            profile.shards = 640
+            profile.unlockedItems.formUnion(["skin.pulse", "skin.hex", "skin.nova", "trail.ribbon",
+                                             "trail.rainbow", "theme.synthwave", "theme.ocean"])
+            profile.selectedSkin = "skin.nova"
+            profile.selectedTrail = "trail.rainbow"
+            profile.achievements = ["ach.tutorial", "ach.gates25", "ach.score1000", "ach.combo20", "ach.combo50",
+                                    "ach.rush", "ach.overdrive", "ach.hyper", "ach.shards30", "ach.shards500",
+                                    "ach.shield", "ach.runs25", "ach.gates1000"]
+        }
+        if let demoTheme, CosmeticCatalog.item(demoTheme)?.category == .theme {
+            profile.unlockedItems.insert(demoTheme)
+            profile.selectedTheme = demoTheme
+        }
     }
 }
