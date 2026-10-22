@@ -25,6 +25,10 @@ on:
         description: macOS runner label (e.g. macos-15, macos-15-intel)
         type: string
         default: macos-15
+      run_ui_tests:
+        description: Run simulator UI tests before archiving (disable only if the runner pool is unreliable)
+        type: boolean
+        default: true
       testflight_upload:
         description: Also upload the signed build to App Store Connect / TestFlight (needs the app record)
         type: boolean
@@ -66,11 +70,13 @@ jobs:
         run: swift test 2>&1 | tee ../../artifacts/core-tests.log
 
       - name: Pick simulator
+        if: github.event_name != 'workflow_dispatch' || inputs.run_ui_tests
         id: sim
         run: |
           echo "udid=$(xcrun simctl list devices available -j | python3 scripts/ci/pick_simulator.py)" >> "$GITHUB_OUTPUT"
 
       - name: UI tests on simulator
+        if: github.event_name != 'workflow_dispatch' || inputs.run_ui_tests
         run: |
           set -o pipefail
           xcodebuild test \
@@ -83,14 +89,14 @@ jobs:
           grep -q "\*\* TEST SUCCEEDED \*\*" artifacts/ui-tests.log
 
       - name: Export UI test screenshots
-        if: always()
+        if: (always()) && (github.event_name != 'workflow_dispatch' || inputs.run_ui_tests)
         run: |
           mkdir -p artifacts/screenshots
           xcrun xcresulttool export attachments --path artifacts/UITests.xcresult --output-path artifacts/screenshots || true
           ls -la artifacts/screenshots || true
 
       - name: Small-screen smoke test (iPhone SE)
-        if: success()
+        if: (success()) && (github.event_name != 'workflow_dispatch' || inputs.run_ui_tests)
         run: |
           SE="$(xcrun simctl list devices available -j | python3 scripts/ci/pick_simulator.py "iPhone SE (3rd generation)")"
           xcrun simctl boot "$SE" || true
