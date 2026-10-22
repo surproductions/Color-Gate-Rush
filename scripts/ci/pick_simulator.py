@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 """Prints the UDID of an available iPhone simulator on the newest iOS runtime.
 
-Usage: xcrun simctl list devices available -j | python3 pick_simulator.py [preferred name...]
+Usage: xcrun simctl list devices available -j | python3 pick_simulator.py [--only] [preferred name...]
 """
 import json
 import re
 import sys
 
-preferred = sys.argv[1:] or ["iPhone 16", "iPhone 16 Pro", "iPhone 15"]
+args = sys.argv[1:]
+only = bool(args) and args[0] == "--only"  # restrict to the named devices
+if only:
+    args = args[1:]
+preferred = args or ["iPhone 16", "iPhone 16 Pro", "iPhone 15"]
 devices = json.load(sys.stdin)["devices"]
 candidates = []
 for runtime, entries in devices.items():
@@ -16,6 +20,8 @@ for runtime, entries in devices.items():
         continue
     version = (int(match.group(1)), int(match.group(2)))
     for device in entries:
+        if only and device["name"] not in preferred:
+            continue
         if device.get("isAvailable") and device["name"].startswith("iPhone"):
             rank = preferred.index(device["name"]) if device["name"] in preferred else len(preferred)
             candidates.append((version, -rank, device["name"], device["udid"]))

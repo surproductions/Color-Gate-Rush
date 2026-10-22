@@ -1,0 +1,56 @@
+name: App Store Screenshots
+
+# Captures 6.9" iPhone screenshots (1320 x 2868) for the App Store listing and publishes them to
+# the `appstore-screenshots` branch and as a workflow artifact.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Pick 6.9-inch simulator
+        id: sim
+        run: |
+          echo "udid=$(xcrun simctl list devices available -j | python3 scripts/ci/pick_simulator.py --only 'iPhone 16 Pro Max' 'iPhone 17 Pro Max')" >> "$GITHUB_OUTPUT"
+      - name: Capture screenshots
+        run: |
+          set -o pipefail
+          mkdir -p artifacts
+          xcodebuild test -project ColorGateRush.xcodeproj -scheme ColorGateRush \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -only-testing:ColorGateRushUITests/AppStoreScreenshots \
+            -resultBundlePath artifacts/Screenshots.xcresult CODE_SIGNING_ALLOWED=NO 2>&1 \
+            | tee artifacts/screenshots.log | grep -E "Test Case|error:|\*\* TEST" || true
+      - name: Export and name screenshots
+        run: |
+          mkdir -p raw store
+          xcrun xcresulttool export attachments --path artifacts/Screenshots.xcresult --output-path raw
+          python3 - <<'PY'
+          import json, shutil
+          for test in json.load(open("raw/manifest.json")):
+              for a in test.get("attachments", []):
+                  name = a["suggestedHumanReadableName"].rsplit("_0_", 1)[0]
+                  shutil.copy(f"raw/{a['exportedFileName']}", f"store/{name}.png")
+          PY
+          sips -g pixelWidth -g pixelHeight store/*.png | paste - - - | head -50
+      - name: Publish to appstore-screenshots branch
+        run: |
+          cd store
+          git init -q -b appstore-screenshots
+          git add -A
+          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "App Store screenshots (run ${GITHUB_RUN_NUMBER})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" appstore-screenshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appstore-screenshots
+          path: store

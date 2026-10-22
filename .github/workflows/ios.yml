@@ -70,6 +70,7 @@ jobs:
             -destination "id=${{ steps.sim.outputs.udid }}" \
             -derivedDataPath build/DerivedData \
             -resultBundlePath artifacts/UITests.xcresult \
+            -skip-testing:ColorGateRushUITests/AppStoreScreenshots \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee artifacts/ui-tests.log | grep -E "Test Case|error:|\*\* (TEST|BUILD)" || true
           grep -q "\*\* TEST SUCCEEDED \*\*" artifacts/ui-tests.log
 

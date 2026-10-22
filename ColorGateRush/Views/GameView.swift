@@ -20,6 +20,7 @@ struct GameView: View {
             }
             #if DEBUG
             if model.debug.autopilot { controller.scene.autopilot = Autopilot() }
+            controller.scene.autopilotSeconds = model.debug.autopilotSeconds
             controller.scene.showsDebugOverlay = model.debug.overlay
             #endif
             return controller

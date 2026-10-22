@@ -84,6 +84,13 @@ final class ColorGateRushUITests: XCTestCase {
         let assist = app.switches["Color assist"]
         XCTAssertTrue(assist.exists)
         attachScreenshot("settings")
+        let privacy = app.buttons["privacyButton"]
+        if !privacy.isHittable { app.swipeUp() }
+        privacy.tap()
+        XCTAssertTrue(app.staticTexts["Privacy"].waitForExistence(timeout: 3))
+        attachScreenshot("privacy")
+        app.buttons["Back"].tap()
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
         app.buttons["Back"].tap()
         XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 3))
     }
