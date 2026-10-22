@@ -12,7 +12,7 @@ network access, no accounts, no ads and no tracking.
 
 | | |
 |---|---|
-| **Move** | Tap the left or right half of the screen to move one lane (or switch to *Swipe* in Settings). |
+| **Move** | Tap the left or right side **or** swipe left/right to move one lane. *Tap + Swipe* is the default; *Tap Sides* (fires on touch-down) and *Swipe Only* are in Settings and the pause menu. |
 | **Gates** | Only pass through a gate whose color *and shape* match your orb. A wrong color ends the run. |
 | **Barriers** | Dark, striped blocks marked with an ✕. Avoid them in every color. |
 | **Prisms** | Full-width bands. Passing one changes your orb to the prism's color. |

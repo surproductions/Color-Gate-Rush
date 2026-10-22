@@ -1,15 +1,26 @@
 import Foundation
 
 enum ControlScheme: String, Codable, CaseIterable {
-    /// Tap the left/right half of the screen.
+    /// Tap the left/right half of the screen *or* swipe; both work at once.
+    case both
+    /// Tap the left/right half of the screen (moves on touch-down, fastest response).
     case tap
     /// Swipe left/right anywhere.
     case swipe
 
     var displayName: String {
         switch self {
+        case .both: return "Tap + Swipe"
         case .tap: return "Tap Sides"
-        case .swipe: return "Swipe"
+        case .swipe: return "Swipe Only"
+        }
+    }
+
+    var instructions: String {
+        switch self {
+        case .both: return "Tap the left or right side, or swipe left or right, to move one lane."
+        case .tap: return "Tap the left or right half of the screen to move one lane."
+        case .swipe: return "Swipe left or right anywhere to move one lane."
         }
     }
 }
@@ -22,7 +33,7 @@ struct GameSettings: Codable, Equatable {
     var hapticsEnabled = true
     var reducedMotion = false
     var colorAssist = false
-    var controlScheme: ControlScheme = .tap
+    var controlScheme: ControlScheme = .both
 
     init() {}
 

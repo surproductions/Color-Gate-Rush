@@ -28,13 +28,8 @@ struct SettingsView: View {
                     Panel {
                         VStack(alignment: .leading, spacing: 14) {
                             sectionTitle("CONTROLS")
-                            Picker("Controls", selection: binding(\.controlScheme)) {
-                                ForEach(ControlScheme.allCases, id: \.self) { Text($0.displayName).tag($0) }
-                            }
-                            .pickerStyle(.segmented)
-                            Text(settings.controlScheme == .tap
-                                 ? "Tap the left or right half of the screen to move one lane."
-                                 : "Swipe left or right anywhere to move one lane.")
+                            ControlSchemePicker(selection: binding(\.controlScheme))
+                            Text(settings.controlScheme.instructions)
                                 .font(.system(.caption, design: .rounded))
                                 .foregroundStyle(UIPalette.secondaryText)
                         }
@@ -99,14 +94,13 @@ struct SettingsView: View {
             .font(.system(.body, design: .rounded).weight(.semibold))
         }
         .menuScreen(theme: model.theme, animated: false)
-        .confirmationDialog("Reset all progress?", isPresented: $confirmReset, titleVisibility: .visible) {
-            Button("Reset Everything", role: .destructive) {
-                model.resetProgress()
-                resetDone = true
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Best scores, shards, unlocks, achievements and tutorial progress will be erased. Settings are kept. This cannot be undone.")
+        .gameDialog(isPresented: $confirmReset,
+                    GameDialogContent(icon: "trash.fill", title: "Reset all progress?",
+                                      message: "Best scores, shards, unlocks, achievements and tutorial progress will be erased. Settings are kept. This can't be undone.",
+                                      confirmTitle: "Reset Everything", confirmIcon: "trash.fill",
+                                      confirmIdentifier: "confirmResetButton", tone: .destructive)) {
+            model.resetProgress()
+            resetDone = true
         }
     }
 

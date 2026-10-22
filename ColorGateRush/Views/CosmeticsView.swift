@@ -4,6 +4,9 @@ struct CosmeticsView: View {
     @EnvironmentObject private var model: AppModel
     @State private var category: CosmeticCategory = .skin
     @State private var pendingPurchase: CosmeticItem?
+    @State private var showPurchase = false
+    @State private var shortfallItem: CosmeticItem?
+    @State private var showShortfall = false
     @State private var message: String?
 
     var body: some View {
@@ -43,17 +46,34 @@ struct CosmeticsView: View {
         }
         .menuScreen(theme: model.theme, animated: false)
         .animation(.easeInOut(duration: 0.2), value: message)
-        .confirmationDialog(pendingPurchase.map { "Unlock \($0.name)?" } ?? "",
-                            isPresented: Binding(get: { pendingPurchase != nil }, set: { if !$0 { pendingPurchase = nil } }),
-                            titleVisibility: .visible) {
+        .gameDialog(isPresented: $showPurchase,
+                    GameDialogContent(icon: "lock.open.fill",
+                                      title: "Unlock \(pendingPurchase?.name ?? "")?",
+                                      message: pendingPurchase?.detail,
+                                      confirmTitle: "Unlock for \(pendingPurchase?.cost ?? 0) shards",
+                                      confirmIcon: "sparkles",
+                                      confirmIdentifier: "confirmUnlockButton")) {
+            guard let item = pendingPurchase else { return }
+            let result = model.purchase(item)
+            message = Self.describe(result, item: item)
+        } accessory: {
             if let item = pendingPurchase {
-                Button("Unlock for \(item.cost) shards") {
-                    let result = model.purchase(item)
-                    message = Self.describe(result, item: item)
-                    pendingPurchase = nil
+                VStack(spacing: 14) {
+                    CosmeticIcon(item: item)
+                        .frame(height: 70)
+                    ShardPriceRow(cost: item.cost, balance: model.profile.shards)
                 }
-                Button("Cancel", role: .cancel) { pendingPurchase = nil }
             }
+        }
+        .gameDialog(isPresented: $showShortfall,
+                    GameDialogContent(icon: "diamond.fill",
+                                      title: "Not enough shards",
+                                      message: shortfallItem.map {
+                                          "\($0.name) costs \($0.cost). You need \(max(0, $0.cost - model.profile.shards)) more. Collect shards during runs and earn bonus shards from achievements."
+                                      },
+                                      confirmTitle: "Play to Earn", confirmIcon: "play.fill",
+                                      confirmIdentifier: "playToEarnButton", cancelTitle: "Not Now")) {
+            model.startGame()
         }
     }
 
@@ -63,9 +83,12 @@ struct CosmeticsView: View {
             message = "\(item.name) equipped"
         } else if model.profile.shards >= item.cost {
             pendingPurchase = item
+            showPurchase = true
+            model.haptics.selection()
         } else {
             model.haptics.warning()
-            message = "You need \(item.cost - model.profile.shards) more shards. Earn them by playing!"
+            shortfallItem = item
+            showShortfall = true
         }
     }
 

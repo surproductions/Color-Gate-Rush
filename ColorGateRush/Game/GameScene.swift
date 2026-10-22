@@ -64,6 +64,9 @@ final class GameScene: SKScene {
     private let dashCount = 7
 
     private var swipeStarts: [ObjectIdentifier: CGPoint] = [:]
+    private var swipedTouches = Set<ObjectIdentifier>()
+    /// Can change mid-run from the pause menu.
+    var controlScheme: ControlScheme
 
     init(session: GameSession, style: SceneStyle, size: CGSize) {
         self.session = session
@@ -71,6 +74,7 @@ final class GameScene: SKScene {
         self.theme = VisualTheme.theme(for: style.themeID)
         self.textures = TextureFactory(colorAssist: style.colorAssist)
         self.displayedColor = session.color
+        self.controlScheme = style.controlScheme
         super.init(size: size)
         scaleMode = .resizeFill
         anchorPoint = .zero
@@ -703,31 +707,32 @@ final class GameScene: SKScene {
 
     // MARK: - Input
 
+    /// Horizontal travel (points) that turns a touch into a swipe.
+    private let swipeThreshold: CGFloat = 24
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
-            let point = touch.location(in: self)
-            switch style.controlScheme {
+            switch controlScheme {
             case .tap:
-                // Screen-space halves: the camera may be mid-shake, so use the view location.
-                let x = touch.location(in: view).x
-                let width = view?.bounds.width ?? size.width
-                controller?.requestMove(x < width / 2 ? -1 : 1)
-            case .swipe:
-                swipeStarts[ObjectIdentifier(touch)] = point
+                // Fire on touch-down for the fastest possible response.
+                moveTowardSide(of: touch)
+            case .swipe, .both:
+                swipeStarts[ObjectIdentifier(touch)] = touch.location(in: self)
             }
         }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard style.controlScheme == .swipe else { return }
+        guard controlScheme != .tap else { return }
         for touch in touches {
             let key = ObjectIdentifier(touch)
             guard let start = swipeStarts[key] else { continue }
             let point = touch.location(in: self)
             let dx = point.x - start.x
             let dy = point.y - start.y
-            if abs(dx) > 24 && abs(dx) > abs(dy) {
+            if abs(dx) > swipeThreshold && abs(dx) > abs(dy) {
                 controller?.requestMove(dx < 0 ? -1 : 1)
+                swipedTouches.insert(key)
                 // One move per swipe; restart tracking so a long drag can chain lanes deliberately.
                 swipeStarts[key] = point
             }
@@ -735,10 +740,29 @@ final class GameScene: SKScene {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        touches.forEach { swipeStarts[ObjectIdentifier($0)] = nil }
+        for touch in touches {
+            let key = ObjectIdentifier(touch)
+            // In combined mode, a touch that never became a swipe counts as a tap on release.
+            if controlScheme == .both, !swipedTouches.contains(key), let start = swipeStarts[key],
+               abs(touch.location(in: self).x - start.x) <= swipeThreshold {
+                moveTowardSide(of: touch)
+            }
+            swipeStarts[key] = nil
+            swipedTouches.remove(key)
+        }
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        touches.forEach { swipeStarts[ObjectIdentifier($0)] = nil }
+        for touch in touches {
+            swipeStarts[ObjectIdentifier(touch)] = nil
+            swipedTouches.remove(ObjectIdentifier(touch))
+        }
+    }
+
+    private func moveTowardSide(of touch: UITouch) {
+        // Screen-space halves: the camera may be mid-shake, so use the view location.
+        let x = touch.location(in: view).x
+        let width = view?.bounds.width ?? size.width
+        controller?.requestMove(x < width / 2 ? -1 : 1)
     }
 }

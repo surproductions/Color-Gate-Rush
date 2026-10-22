@@ -33,9 +33,7 @@ struct GameView: View {
                        preferredFramesPerSecond: 120,
                        options: [.ignoresSiblingOrder])
                 .ignoresSafeArea()
-                .accessibilityLabel(model.profile.settings.controlScheme == .tap
-                                    ? "Game area. Tap the left or right side to switch lanes."
-                                    : "Game area. Swipe left or right to switch lanes.")
+                .accessibilityLabel("Game area. " + model.profile.settings.controlScheme.instructions)
                 .accessibilityAddTraits(.allowsDirectInteraction)
 
             HUDView(hud: controller.hud, onPause: controller.pause)
@@ -52,17 +50,24 @@ struct GameView: View {
         .onChange(of: model.isActive) { active in
             if !active { controller.handleInterruption() }
         }
-        .confirmationDialog("Restart this run?", isPresented: $confirmRestart, titleVisibility: .visible) {
-            Button("Restart", role: .destructive) { controller.restart() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Your current score will not be saved.")
+        .onChange(of: model.profile.settings.controlScheme) { scheme in
+            controller.scene.controlScheme = scheme
         }
-        .confirmationDialog("Quit to home?", isPresented: $confirmQuit, titleVisibility: .visible) {
-            Button("Quit Run", role: .destructive) { model.abandonRun() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("Your current score will not be saved.")
+        .gameDialog(isPresented: $confirmRestart,
+                    GameDialogContent(icon: "arrow.counterclockwise", title: "Restart this run?",
+                                      message: "Your current score won't be saved.",
+                                      confirmTitle: "Restart", confirmIcon: "arrow.counterclockwise",
+                                      confirmIdentifier: "confirmRestartButton", cancelTitle: "Keep Playing",
+                                      tone: .destructive)) {
+            controller.restart()
+        }
+        .gameDialog(isPresented: $confirmQuit,
+                    GameDialogContent(icon: "house.fill", title: "Quit to home?",
+                                      message: "Your current score won't be saved.",
+                                      confirmTitle: "Quit Run", confirmIcon: "xmark",
+                                      confirmIdentifier: "confirmQuitButton", cancelTitle: "Keep Playing",
+                                      tone: .destructive)) {
+            model.abandonRun()
         }
         .statusBarHidden(true)
     }
@@ -222,6 +227,16 @@ private struct PauseMenu: View {
                 Button(action: onQuit) { Label("Home", systemImage: "house.fill") }
                     .buttonStyle(GlassButtonStyle())
                     .accessibilityIdentifier("quitButton")
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("CONTROLS")
+                        .font(.system(.caption2, design: .rounded).weight(.heavy))
+                        .tracking(2)
+                        .foregroundStyle(UIPalette.secondaryText)
+                    ControlSchemePicker(selection: Binding(
+                        get: { model.profile.settings.controlScheme },
+                        set: { scheme in model.updateSettings { $0.controlScheme = scheme } }))
+                }
+                .padding(.top, 8)
                 HStack(spacing: 12) {
                     QuickToggle(icon: model.profile.settings.soundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill",
                                 label: "Sound", isOn: model.profile.settings.soundEnabled) {

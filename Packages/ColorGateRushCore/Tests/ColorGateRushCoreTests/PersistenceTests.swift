@@ -81,8 +81,15 @@ final class PersistenceTests: XCTestCase {
         XCTAssertEqual(profile.achievements, ["ach.rush"])
         XCTAssertEqual(profile.settings.musicVolume, 1)
         XCTAssertEqual(profile.settings.soundVolume, 0)
-        XCTAssertEqual(profile.settings.controlScheme, .tap)
+        XCTAssertEqual(profile.settings.controlScheme, .both, "unknown scheme falls back to the default")
         XCTAssertFalse(profile.tutorialCompleted)
+    }
+
+    func testStoredControlSchemeSurvivesDefaultChange() throws {
+        let backing = InMemoryStore()
+        backing.saveData(Data(#"{"settings":{"controlScheme":"tap"}}"#.utf8), forKey: ProfileStore.profileKey)
+        XCTAssertEqual(ProfileStore(store: backing).load().settings.controlScheme, .tap)
+        XCTAssertEqual(PlayerProfile().settings.controlScheme, .both)
     }
 
     func testResetClearsProfile() {

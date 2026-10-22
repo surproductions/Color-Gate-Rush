@@ -78,7 +78,7 @@ Select the build that the **iOS Build** workflow uploaded (section 8).
 ```
 Color Gate Rush is a single-player offline arcade game. No account, login, network connection, in-app purchase or ads.
 
-How to play: the first launch starts a short interactive tutorial. Tap the left/right half of the screen to switch lanes (swipe can be enabled in Settings). Pass through gates matching the orb's color and shape; striped barriers end the run; full-width prisms change the orb's color. Shards earned in play unlock cosmetic items in "Style" (no real money).
+How to play: the first launch starts a short interactive tutorial. Tap the left/right side of the screen or swipe left/right to switch lanes (Settings and the pause menu offer Tap + Swipe, Tap Sides, or Swipe Only). Pass through gates matching the orb's color and shape; striped barriers end the run; full-width prisms change the orb's color. Shards earned in play unlock cosmetic items in "Style" (no real money).
 
 Accessibility: Settings > Color Assist labels gates by name; Reduce Motion disables shake and speed effects. A privacy policy is available in Settings > Privacy Policy.
 ```

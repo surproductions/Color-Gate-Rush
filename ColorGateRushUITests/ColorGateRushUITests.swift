@@ -40,7 +40,7 @@ final class ColorGateRushUITests: XCTestCase {
         pause.tap()
         XCTAssertTrue(app.buttons["quitButton"].waitForExistence(timeout: 20))
         app.buttons["quitButton"].tap()
-        app.buttons["Quit Run"].tap()
+        app.buttons["confirmQuitButton"].tap()
         XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
     }
 
@@ -57,7 +57,7 @@ final class ColorGateRushUITests: XCTestCase {
         pause.tap()
         XCTAssertTrue(app.buttons["quitButton"].waitForExistence(timeout: 20))
         app.buttons["quitButton"].tap()
-        app.buttons["Quit Run"].tap()
+        app.buttons["confirmQuitButton"].tap()
         XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
     }
 
@@ -86,6 +86,16 @@ final class ColorGateRushUITests: XCTestCase {
         app.buttons["cosmeticsButton"].tap()
         XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 20))
         attachScreenshot("cosmetics")
+        // Unlock "Pulse" (60 shards) through the custom dialog.
+        let pulse = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Pulse'")).firstMatch
+        XCTAssertTrue(pulse.waitForExistence(timeout: 20))
+        pulse.tap()
+        let unlock = app.buttons["confirmUnlockButton"]
+        XCTAssertTrue(unlock.waitForExistence(timeout: 20))
+        attachScreenshot("unlock-dialog")
+        unlock.tap()
+        let balance = app.descendants(matching: .any).matching(NSPredicate(format: "label == '440 shards'")).firstMatch
+        XCTAssertTrue(balance.waitForExistence(timeout: 20), "60 shards should have been spent")
         app.buttons["Back"].tap()
         app.buttons["progressButton"].tap()
         XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 20))
@@ -95,6 +105,12 @@ final class ColorGateRushUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 20))
         let assist = app.switches["Color assist"]
         XCTAssertTrue(assist.exists)
+        let swipe = app.buttons["controls-swipe"]
+        XCTAssertTrue(swipe.exists)
+        swipe.tap()
+        XCTAssertTrue(swipe.isSelected)
+        app.buttons["controls-both"].tap()
+        XCTAssertTrue(app.buttons["controls-both"].isSelected)
         attachScreenshot("settings")
         let privacy = app.buttons["privacyButton"]
         if !privacy.isHittable { app.swipeUp() }

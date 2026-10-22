@@ -4,7 +4,7 @@ import Foundation
 /// In tutorial mode mistakes never end the run; the session reports them instead.
 struct TutorialScript: RowSource {
     static let steps: [(kind: RowKind, lanes: [LaneContent], hint: String)] = [
-        (.hazard, [.open, .hazard, .hazard], "Tap the left or right side of the screen to switch lanes"),
+        (.hazard, [.open, .hazard, .hazard], "Tap the left or right side, or swipe, to switch lanes"),
         (.hazard, [.hazard, .hazard, .open], "Dodge the striped barriers"),
         (.gate, [.gate(.amber), .gate(.crimson), .gate(.amber)], "Fly through the gate that matches your orb's color and shape"),
         (.gate, [.gate(.crimson), .gate(.amber), .gate(.amber)], "Chain matches to build your combo multiplier"),
