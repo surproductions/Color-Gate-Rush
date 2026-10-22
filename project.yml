@@ -1,0 +1,64 @@
+# XcodeGen spec — generate the Xcode project with `xcodegen generate`.
+name: ColorGateRush
+options:
+  bundleIdPrefix: com.surproductions
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+    # Set your Apple Developer Team ID here (or pass DEVELOPMENT_TEAM=... to xcodebuild).
+    DEVELOPMENT_TEAM: ""
+targets:
+  ColorGateRush:
+    type: application
+    platform: iOS
+    sources:
+      - path: ColorGateRush
+        excludes:
+          - Info.plist
+      - path: Packages/ColorGateRushCore/Sources/ColorGateRushCore
+        group: Core
+    settings:
+      base:
+        PRODUCT_NAME: ColorGateRush
+        PRODUCT_BUNDLE_IDENTIFIER: com.surproductions.colorgaterush
+        INFOPLIST_FILE: ColorGateRush/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_PREVIEWS: YES
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: NO
+  ColorGateRushUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: ColorGateRushUITests
+    dependencies:
+      - target: ColorGateRush
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.surproductions.colorgaterush.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: ColorGateRush
+        CODE_SIGN_STYLE: Automatic
+schemes:
+  ColorGateRush:
+    build:
+      targets:
+        ColorGateRush: all
+        ColorGateRushUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - ColorGateRushUITests
+    archive:
+      config: Release

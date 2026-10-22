@@ -1,0 +1,193 @@
+name: iOS Build
+
+# Builds Color Gate Rush on a macOS runner:
+#   1. core unit tests, 2. UI tests + screenshots on a simulator,
+#   3. a Release archive for real devices (generic/platform=iOS) packaged as an IPA,
+#   4. optional signing when signing secrets are configured,
+#   5. optional GitHub Release (tag pushes `v*`, or manual run with publish_release).
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+    paths-ignore: ['**.md']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish a GitHub Release with the IPA
+        type: boolean
+        default: false
+      release_tag:
+        description: Release tag to create (e.g. v1.0.1)
+        type: string
+        default: ''
+
+permissions:
+  contents: write # only used by the release step
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test, archive and package
+    runs-on: macos-15
+    timeout-minutes: 75
+    env:
+      BUILD_NUMBER: ${{ github.run_number }}
+      HAS_SIGNING: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 != '' && secrets.IOS_PROVISIONING_PROFILE_BASE64 != '' && secrets.IOS_TEAM_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)"
+          if [ -n "$XCODE" ]; then sudo xcode-select -s "$XCODE"; fi
+          xcodebuild -version
+          mkdir -p artifacts
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Core unit tests
+        working-directory: Packages/ColorGateRushCore
+        run: swift test 2>&1 | tee ../../artifacts/core-tests.log
+
+      - name: Pick simulator
+        id: sim
+        run: |
+          echo "udid=$(xcrun simctl list devices available -j | python3 scripts/ci/pick_simulator.py)" >> "$GITHUB_OUTPUT"
+
+      - name: UI tests on simulator
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project ColorGateRush.xcodeproj -scheme ColorGateRush \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath artifacts/UITests.xcresult \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee artifacts/ui-tests.log | grep -E "Test Case|error:|\*\* (TEST|BUILD)" || true
+          grep -q "\*\* TEST SUCCEEDED \*\*" artifacts/ui-tests.log
+
+      - name: Export UI test screenshots
+        if: always()
+        run: |
+          mkdir -p artifacts/screenshots
+          xcrun xcresulttool export attachments --path artifacts/UITests.xcresult --output-path artifacts/screenshots || true
+          ls -la artifacts/screenshots || true
+
+      - name: Small-screen smoke test (iPhone SE)
+        if: success()
+        run: |
+          SE="$(xcrun simctl list devices available -j | python3 scripts/ci/pick_simulator.py "iPhone SE (3rd generation)")"
+          xcrun simctl boot "$SE" || true
+          APP="build/DerivedData/Build/Products/Debug-iphonesimulator/ColorGateRush.app"
+          xcrun simctl install "$SE" "$APP"
+          xcrun simctl launch "$SE" com.surproductions.colorgaterush -CGRResetProfile YES
+          sleep 6
+          xcrun simctl io "$SE" screenshot artifacts/screenshots/small-home.png
+          xcrun simctl terminate "$SE" com.surproductions.colorgaterush
+          xcrun simctl launch "$SE" com.surproductions.colorgaterush -CGRSkipTutorial YES -CGRStartScreen game -CGRAutopilot YES -CGRSeed 99
+          sleep 15
+          xcrun simctl io "$SE" screenshot artifacts/screenshots/small-gameplay.png
+          # The app must still be running after 15 s of autopilot gameplay.
+          xcrun simctl spawn "$SE" launchctl list | grep -q colorgaterush
+          xcrun simctl shutdown "$SE" || true
+
+      - name: Archive for devices (Release, unsigned)
+        run: |
+          set -o pipefail
+          xcodebuild archive \
+            -project ColorGateRush.xcodeproj -scheme ColorGateRush -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath build/ColorGateRush.xcarchive \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" 2>&1 \
+            | tee artifacts/archive.log | grep -E "error:|warning:|\*\* ARCHIVE" || true
+          grep -q "\*\* ARCHIVE SUCCEEDED \*\*" artifacts/archive.log
+
+      - name: Package IPA
+        run: |
+          if [ "$HAS_SIGNING" = "true" ]; then
+            echo "Signing secrets found: exporting a signed IPA (${IOS_EXPORT_METHOD:-ad-hoc})."
+            scripts/ci/sign_and_export.sh artifacts/Color-Gate-Rush.ipa
+            echo "signed" > artifacts/signing-status.txt
+          else
+            echo "::notice::Signing secrets are not configured; producing an UNSIGNED device IPA. See README > Signing."
+            scripts/ci/package_unsigned_ipa.sh build/ColorGateRush.xcarchive artifacts/Color-Gate-Rush.ipa
+            echo "unsigned" > artifacts/signing-status.txt
+          fi
+        env:
+          IOS_CERTIFICATE_P12_BASE64: ${{ secrets.IOS_CERTIFICATE_P12_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+          IOS_EXPORT_METHOD: ${{ vars.IOS_EXPORT_METHOD }}
+          IOS_BUNDLE_ID: ${{ vars.IOS_BUNDLE_ID }}
+
+      - name: Verify IPA
+        run: |
+          scripts/ci/verify_ipa.sh artifacts/Color-Gate-Rush.ipa | tee artifacts/ipa-verification.txt
+          shasum -a 256 artifacts/Color-Gate-Rush.ipa | tee artifacts/Color-Gate-Rush.ipa.sha256
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: color-gate-rush-${{ github.run_number }}
+          path: |
+            artifacts/Color-Gate-Rush.ipa
+            artifacts/Color-Gate-Rush.ipa.sha256
+            artifacts/ipa-verification.txt
+            artifacts/screenshots
+            artifacts/*.log
+          if-no-files-found: warn
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.publish_release)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.release_tag }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then TAG="${INPUT_TAG:-v1.0.0-build.${BUILD_NUMBER}}"; fi
+          STATUS="$(cat artifacts/signing-status.txt)"
+          SHA="$(awk '{print $1}' artifacts/Color-Gate-Rush.ipa.sha256)"
+          SIZE="$(stat -f%z artifacts/Color-Gate-Rush.ipa)"
+          {
+            echo "## Color Gate Rush ${TAG}"
+            echo
+            echo "Built by GitHub Actions run [#${GITHUB_RUN_NUMBER}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) from commit ${GITHUB_SHA}."
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| File | \`Color-Gate-Rush.ipa\` |"
+            echo "| Size | ${SIZE} bytes |"
+            echo "| SHA-256 | \`${SHA}\` |"
+            echo "| Signing | **${STATUS}** |"
+            echo
+            if [ "$STATUS" = "unsigned" ]; then
+              echo "> **This IPA is an unsigned Release build for real devices (arm64, iphoneos).** iOS only installs signed apps,"
+              echo "> so re-sign it before installing — for example with AltStore or Sideloadly using your own Apple ID,"
+              echo "> or with your Apple Developer certificate. To have CI produce a signed IPA, add the signing secrets described in the README."
+            fi
+            echo
+            echo "### Verification"
+            echo '```'
+            cat artifacts/ipa-verification.txt
+            echo '```'
+          } > artifacts/release-notes.md
+          TITLE="Color Gate Rush ${TAG}"
+          if [ "$STATUS" = "unsigned" ]; then TITLE="${TITLE} (unsigned IPA)"; fi
+          ASSETS=(artifacts/Color-Gate-Rush.ipa artifacts/Color-Gate-Rush.ipa.sha256 artifacts/ipa-verification.txt)
+          for shot in artifacts/screenshots/*.png; do [ -f "$shot" ] && ASSETS+=("$shot"); done
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+            gh release edit "$TAG" --title "$TITLE" --notes-file artifacts/release-notes.md
+          else
+            gh release create "$TAG" "${ASSETS[@]}" --title "$TITLE" --notes-file artifacts/release-notes.md --target "$GITHUB_SHA"
+          fi
+          echo "Download: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${TAG}/Color-Gate-Rush.ipa"
