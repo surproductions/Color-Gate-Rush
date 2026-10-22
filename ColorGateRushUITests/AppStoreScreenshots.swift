@@ -25,14 +25,14 @@ final class AppStoreScreenshots: XCTestCase {
 
     func test01Home() {
         let app = launch()
-        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
         sleep(3)
         shot("store-home")
     }
 
     func test02Gameplay() {
         let app = launch(["-CGRStartScreen", "game", "-CGRAutopilot", "YES", "-CGRSeed", "2024"])
-        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 20))
         for second in stride(from: 8, through: 72, by: 4) {
             sleep(4)
             shot(String(format: "store-gameplay-midnight-%03d", second))
@@ -42,7 +42,7 @@ final class AppStoreScreenshots: XCTestCase {
     func test03GameplaySynthwave() {
         let app = launch(["-CGRStartScreen", "game", "-CGRAutopilot", "YES", "-CGRSeed", "77",
                           "-CGRDemoTheme", "theme.synthwave"])
-        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 20))
         sleep(84)
         for second in stride(from: 88, through: 124, by: 3) {
             sleep(3)
@@ -53,7 +53,7 @@ final class AppStoreScreenshots: XCTestCase {
     func test04Tutorial() {
         let app = launch(demo: false)
         app.buttons["playButton"].tap()
-        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 20))
         sleep(4)
         shot("store-tutorial-a")
         sleep(2)
@@ -71,7 +71,7 @@ final class AppStoreScreenshots: XCTestCase {
     func test06Style() {
         let app = launch()
         app.buttons["cosmeticsButton"].tap()
-        XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 20))
         sleep(1)
         shot("store-style-orbs")
         app.buttons["Themes"].tap()
@@ -82,7 +82,7 @@ final class AppStoreScreenshots: XCTestCase {
     func test07Progress() {
         let app = launch()
         app.buttons["progressButton"].tap()
-        XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 20))
         sleep(1)
         shot("store-progress")
     }

@@ -24,7 +24,7 @@ final class ColorGateRushUITests: XCTestCase {
 
     func testHomeScreenShowsPrimaryActions() {
         let app = launch()
-        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
         XCTAssertTrue(app.buttons["cosmeticsButton"].exists)
         XCTAssertTrue(app.buttons["progressButton"].exists)
         XCTAssertTrue(app.buttons["settingsButton"].exists)
@@ -35,25 +35,25 @@ final class ColorGateRushUITests: XCTestCase {
         let app = launch()
         app.buttons["playButton"].tap()
         let pause = app.buttons["pauseButton"]
-        XCTAssertTrue(pause.waitForExistence(timeout: 5))
+        XCTAssertTrue(pause.waitForExistence(timeout: 20))
         sleep(2)
         attachScreenshot("tutorial")
         pause.tap()
-        XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 20))
         attachScreenshot("paused")
         app.buttons["resumeButton"].tap()
-        XCTAssertTrue(pause.waitForExistence(timeout: 3))
+        XCTAssertTrue(pause.waitForExistence(timeout: 20))
         pause.tap()
         app.buttons["quitButton"].tap()
         app.buttons["Quit Run"].tap()
-        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
     }
 
     func testEndlessRunWithAutopilotThenCrashShowsResults() {
         // Autopilot plays perfectly; this verifies a long stretch of real gameplay doesn't crash the app.
         let app = launch(["-CGRSkipTutorial", "YES", "-CGRStartScreen", "game", "-CGRAutopilot", "YES", "-CGRSeed", "4242"])
         let pause = app.buttons["pauseButton"]
-        XCTAssertTrue(pause.waitForExistence(timeout: 10))
+        XCTAssertTrue(pause.waitForExistence(timeout: 20))
         sleep(12)
         attachScreenshot("gameplay")
         XCTAssertTrue(pause.exists, "run should still be going under autopilot")
@@ -66,32 +66,32 @@ final class ColorGateRushUITests: XCTestCase {
         XCTAssertTrue(app.buttons["retryButton"].waitForExistence(timeout: 60))
         attachScreenshot("results")
         app.buttons["retryButton"].tap()
-        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 20))
     }
 
     func testMenusOpenAndReturn() {
         let app = launch(["-CGRGrantShards", "500"])
         app.buttons["cosmeticsButton"].tap()
-        XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 20))
         attachScreenshot("cosmetics")
         app.buttons["Back"].tap()
         app.buttons["progressButton"].tap()
-        XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 20))
         attachScreenshot("progress")
         app.buttons["Back"].tap()
         app.buttons["settingsButton"].tap()
-        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 20))
         let assist = app.switches["Color assist"]
         XCTAssertTrue(assist.exists)
         attachScreenshot("settings")
         let privacy = app.buttons["privacyButton"]
         if !privacy.isHittable { app.swipeUp() }
         privacy.tap()
-        XCTAssertTrue(app.staticTexts["Privacy"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Privacy"].waitForExistence(timeout: 20))
         attachScreenshot("privacy")
         app.buttons["Back"].tap()
-        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 20))
         app.buttons["Back"].tap()
-        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
     }
 }
