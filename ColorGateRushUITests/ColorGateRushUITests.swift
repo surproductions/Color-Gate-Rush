@@ -31,19 +31,31 @@ final class ColorGateRushUITests: XCTestCase {
         attachScreenshot("home")
     }
 
-    func testTutorialStartsOnFirstPlayAndCanPauseAndQuit() {
+    func testTutorialStartsOnFirstPlayAndCanQuit() {
         let app = launch()
         app.buttons["playButton"].tap()
         let pause = app.buttons["pauseButton"]
         XCTAssertTrue(pause.waitForExistence(timeout: 20))
-        sleep(2)
         attachScreenshot("tutorial")
+        pause.tap()
+        XCTAssertTrue(app.buttons["quitButton"].waitForExistence(timeout: 20))
+        app.buttons["quitButton"].tap()
+        app.buttons["Quit Run"].tap()
+        XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
+    }
+
+    func testPauseResumeAndQuitDuringEndlessRun() {
+        // Autopilot keeps the run alive indefinitely, so timing on slow simulators can't end it early.
+        let app = launch(["-CGRSkipTutorial", "YES", "-CGRStartScreen", "game", "-CGRAutopilot", "YES", "-CGRSeed", "11"])
+        let pause = app.buttons["pauseButton"]
+        XCTAssertTrue(pause.waitForExistence(timeout: 20))
         pause.tap()
         XCTAssertTrue(app.buttons["resumeButton"].waitForExistence(timeout: 20))
         attachScreenshot("paused")
         app.buttons["resumeButton"].tap()
         XCTAssertTrue(pause.waitForExistence(timeout: 20))
         pause.tap()
+        XCTAssertTrue(app.buttons["quitButton"].waitForExistence(timeout: 20))
         app.buttons["quitButton"].tap()
         app.buttons["Quit Run"].tap()
         XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
