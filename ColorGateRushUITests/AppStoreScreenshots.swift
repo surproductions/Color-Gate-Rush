@@ -9,6 +9,10 @@ final class AppStoreScreenshots: XCTestCase {
         continueAfterFailure = true
     }
 
+    /// Menus animate continuously, which slows XCUITest's idle detection badly on CI;
+    /// screens captured from the menus use Reduce Motion (gameplay keeps full effects).
+    private let calm = ["-CGRReduceMotion", "YES"]
+
     private func launch(demo: Bool = true, _ extra: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-CGRResetProfile", "YES"] + (demo ? ["-CGRDemoProfile", "YES"] : []) + extra
@@ -24,7 +28,7 @@ final class AppStoreScreenshots: XCTestCase {
     }
 
     func test01Home() {
-        let app = launch()
+        let app = launch(calm)
         XCTAssertTrue(app.buttons["playButton"].waitForExistence(timeout: 20))
         sleep(3)
         shot("store-home")
@@ -51,7 +55,7 @@ final class AppStoreScreenshots: XCTestCase {
     }
 
     func test04Tutorial() {
-        let app = launch(demo: false)
+        let app = launch(demo: false, calm)
         app.buttons["playButton"].tap()
         XCTAssertTrue(app.buttons["pauseButton"].waitForExistence(timeout: 20))
         sleep(4)
@@ -69,7 +73,7 @@ final class AppStoreScreenshots: XCTestCase {
     }
 
     func test06Style() {
-        let app = launch()
+        let app = launch(calm)
         app.buttons["cosmeticsButton"].tap()
         XCTAssertTrue(app.staticTexts["Style"].waitForExistence(timeout: 20))
         sleep(1)
@@ -80,7 +84,7 @@ final class AppStoreScreenshots: XCTestCase {
     }
 
     func test07Progress() {
-        let app = launch()
+        let app = launch(calm)
         app.buttons["progressButton"].tap()
         XCTAssertTrue(app.staticTexts["Progress"].waitForExistence(timeout: 20))
         sleep(1)
