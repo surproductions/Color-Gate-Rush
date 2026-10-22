@@ -1,0 +1,104 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "F8D98FDB-C4B8-49A9-9737-B824C9712C8B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "gameplay_0_A85F0EA2-CF10-4580-8C2E-186AC72D549C.png",
+        "timestamp" : 1792675165.53
+      }
+    ],
+    "testIdentifier" : "ColorGateRushUITests/testEndlessRunWithAutopilotThenCrashShowsResults()",
+    "testIdentifierURL" : "test://com.apple.xcode/ColorGateRush/ColorGateRushUITests/ColorGateRushUITests/testEndlessRunWithAutopilotThenCrashShowsResults"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "959A020D-CC4D-4027-BAA3-B26E2A8D038B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "home_0_A3A5F500-A16B-40C8-B5EB-D9EF7A8E5A38.png",
+        "timestamp" : 1792675206.448
+      }
+    ],
+    "testIdentifier" : "ColorGateRushUITests/testHomeScreenShowsPrimaryActions()",
+    "testIdentifierURL" : "test://com.apple.xcode/ColorGateRush/ColorGateRushUITests/ColorGateRushUITests/testHomeScreenShowsPrimaryActions"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "7C7BD52E-F605-412D-B258-5888A0E3E074.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "results_0_C368EAF0-AB39-4CD4-B79F-AC5CA2AD3B2B.png",
+        "timestamp" : 1792675237.078
+      }
+    ],
+    "testIdentifier" : "ColorGateRushUITests/testManualRunEndsInResultsAndRetryWorks()",
+    "testIdentifierURL" : "test://com.apple.xcode/ColorGateRush/ColorGateRushUITests/ColorGateRushUITests/testManualRunEndsInResultsAndRetryWorks"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "2998CB00-DC09-4F63-BBFC-73DE94B86C04.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "settings_0_4017AD2E-7213-46F2-96E1-B7B7553ACA5C.png",
+        "timestamp" : 1792675254.237
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "5C96955C-E585-4803-B8D3-FB21FDB7C32A.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "progress_0_BD33DE8D-2FB8-4F86-B9D1-904DBD01D0A5.png",
+        "timestamp" : 1792675251.663
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "378231F5-2731-4574-AF24-6402496FCABE.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "cosmetics_0_92B71F71-ECE6-4B11-826C-83777173D12C.png",
+        "timestamp" : 1792675249.402
+      }
+    ],
+    "testIdentifier" : "ColorGateRushUITests/testMenusOpenAndReturn()",
+    "testIdentifierURL" : "test://com.apple.xcode/ColorGateRush/ColorGateRushUITests/ColorGateRushUITests/testMenusOpenAndReturn"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "B657AB57-E2CA-45EE-8DC9-51A6979919C0.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "paused_0_ED1B9ECD-6EAB-4497-B76A-A5F1BE380AF6.png",
+        "timestamp" : 1792675270.653
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "2911FD29-A09E-4A81-BEA7-99A616FB7FC8",
+        "deviceName" : "iPhone 16",
+        "exportedFileName" : "5341412B-F7DC-412A-869E-E3F3EF89B847.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "tutorial_0_B83ADEFD-9B87-4D0E-A13E-DD073610B707.png",
+        "timestamp" : 1792675268.908
+      }
+    ],
+    "testIdentifier" : "ColorGateRushUITests/testTutorialStartsOnFirstPlayAndCanPauseAndQuit()",
+    "testIdentifierURL" : "test://com.apple.xcode/ColorGateRush/ColorGateRushUITests/ColorGateRushUITests/testTutorialStartsOnFirstPlayAndCanPauseAndQuit"
+  }
+]

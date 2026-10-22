@@ -1,0 +1,25 @@
+== Color Gate Rush IPA verification ==
+File:            Color-Gate-Rush.ipa
+Size (bytes):    850745
+SHA-256:         e59e37fa25fca5e7a03a41f9407d21cd60ebeddd22816451eaa440e28513f12a
+App bundle:      ColorGateRush.app
+Bundle ID:       com.surproductions.colorgaterush
+Display name:    Color Gate Rush
+Version:         1.0.0 (5)
+Minimum iOS:     16.0
+Platform:        iphoneos
+SDK:             iphoneos18.5
+Executable arch: arm64
+Contents:
+  Payload/ColorGateRush.app/
+  Payload/ColorGateRush.app/AppIcon60x60@2x.png
+  Payload/ColorGateRush.app/Assets.car
+  Payload/ColorGateRush.app/AppIcon76x76@2x~ipad.png
+  Payload/ColorGateRush.app/PrivacyInfo.xcprivacy
+  Payload/ColorGateRush.app/ColorGateRush
+  Payload/ColorGateRush.app/Info.plist
+  Payload/ColorGateRush.app/PkgInfo
+Signature:
+  /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/T/tmp.IXTF2uG54w/Payload/ColorGateRush.app: code object is not signed at all
+SIGNING STATUS: UNSIGNED - re-sign before installing on a device
+RESULT: valid iphoneos arm64 application archive
