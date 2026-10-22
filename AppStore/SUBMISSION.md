@@ -65,7 +65,8 @@ arcade,color,match,runner,reflex,lanes,neon,endless,casual,offline,tap,speed,gat
 | Routing app coverage file | none |
 
 ### Screenshots
-Upload the files in [`screenshots/`](screenshots) to the **6.9" iPhone display** slot. They are 1320 × 2868 pixels. Apple scales them down for smaller iPhones, so no other sizes are required. The app is iPhone-only, so there is no iPad slot.
+Upload the files in [`screenshots/`](screenshots), in this order, to the **6.9" iPhone display** slot. They are 1320 × 2868 PNGs with no alpha channel:
+`01-overdrive`, `02-prism`, `03-home`, `04-milestone`, `05-style`, `06-results`, `07-progress`. Apple scales them down for smaller iPhones, so no other sizes are required. The app is iPhone-only, so there is no iPad slot.
 
 ### Build
 Select the build that the **iOS Build** workflow uploaded (section 8).
