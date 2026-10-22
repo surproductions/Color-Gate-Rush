@@ -21,6 +21,10 @@ on:
         description: Release tag to create (e.g. v1.0.1)
         type: string
         default: ''
+      runner:
+        description: macOS runner label (e.g. macos-15, macos-15-intel)
+        type: string
+        default: macos-15
       testflight_upload:
         description: Also upload the signed build to App Store Connect / TestFlight (needs the app record)
         type: boolean
@@ -36,7 +40,7 @@ concurrency:
 jobs:
   build:
     name: Test, archive and package
-    runs-on: macos-15
+    runs-on: ${{ inputs.runner || 'macos-15' }}
     timeout-minutes: 75
     env:
       BUILD_NUMBER: ${{ github.run_number }}
