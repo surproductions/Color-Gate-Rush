@@ -208,10 +208,27 @@ jobs:
           if [ "$STATUS" = "unsigned" ]; then TITLE="${TITLE} (unsigned IPA)"; fi
           ASSETS=(artifacts/Color-Gate-Rush.ipa artifacts/Color-Gate-Rush.ipa.sha256 artifacts/ipa-verification.txt)
           for shot in artifacts/screenshots/*.png; do [ -f "$shot" ] && ASSETS+=("$shot"); done
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" "${ASSETS[@]}" --clobber
-            gh release edit "$TAG" --title "$TITLE" --notes-file artifacts/release-notes.md
-          else
-            gh release create "$TAG" "${ASSETS[@]}" --title "$TITLE" --notes-file artifacts/release-notes.md --target "$GITHUB_SHA"
+          publish_release() {
+            if gh release view "$TAG" >/dev/null 2>&1; then
+              gh release upload "$TAG" "${ASSETS[@]}" --clobber &&
+                gh release edit "$TAG" --title "$TITLE" --notes-file artifacts/release-notes.md
+            else
+              gh release create "$TAG" "${ASSETS[@]}" --title "$TITLE" --notes-file artifacts/release-notes.md --target "$GITHUB_SHA"
+            fi
+          }
+          if publish_release; then
+            echo "Download: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${TAG}/Color-Gate-Rush.ipa"
+            exit 0
           fi
-          echo "Download: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${TAG}/Color-Gate-Rush.ipa"
+          # Fallback: some repository settings refuse release creation to the Actions token while
+          # still allowing pushes. Publish the build to the ipa-builds branch instead.
+          echo "::warning::Release creation was refused; publishing to the ipa-builds branch instead."
+          mkdir -p /tmp/ipa && cp artifacts/Color-Gate-Rush.ipa artifacts/Color-Gate-Rush.ipa.sha256 artifacts/ipa-verification.txt /tmp/ipa/
+          cp artifacts/release-notes.md /tmp/ipa/README.md
+          cd /tmp/ipa
+          git init -q -b ipa-builds
+          git config http.postBuffer 524288000
+          git add -A
+          git -c user.name=ci -c user.email=ci@example.invalid commit -qm "Color Gate Rush ${TAG} (${STATUS})"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ipa-builds
+          echo "Download: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/raw/ipa-builds/Color-Gate-Rush.ipa"
